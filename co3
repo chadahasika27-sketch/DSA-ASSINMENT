@@ -1,0 +1,73 @@
+class Order:
+    def __init__(self, order_id, price):
+        self.order_id = order_id
+        self.price = price
+
+
+class OrderBook:
+    def __init__(self):
+        self.orders = {}  # HashMap
+
+    def insert_order(self, order_id, price):
+        self.orders[order_id] = price
+        print(f"Inserted Order {order_id} at ₹{price}")
+
+    def cancel_order(self, order_id):
+        if order_id in self.orders:
+            del self.orders[order_id]
+            print(f"Cancelled Order {order_id}")
+        else:
+            print("Order not found")
+
+    def best_bid(self):
+        if not self.orders:
+            return None
+        max_price = max(self.orders.values())
+        return max_price
+
+    def display_orders(self):
+        print("\nActive BUY Orders:")
+        for oid, price in sorted(
+                self.orders.items(),
+                key=lambda x: x[1],
+                reverse=True):
+            print(f"Order ID: {oid}  Price: ₹{price}")
+
+
+book = OrderBook()
+
+buy_orders = [
+    (101, 2995),
+    (102, 3000),
+    (103, 2992),
+    (104, 3010),
+    (105, 3005),
+    (106, 2985),
+    (107, 2998),
+    (108, 3015)
+]
+
+print("Incoming BUY Orders\n")
+
+for oid, price in buy_orders:
+    book.insert_order(oid, price)
+
+book.display_orders()
+
+print("\nBest Bid Price:")
+print("₹", book.best_bid())
+
+print("\nCancelling Orders")
+book.cancel_order(105)
+book.cancel_order(107)
+
+book.display_orders()
+
+print("\nBest Bid After Cancellation:")
+print("₹", book.best_bid())
+
+print("\nComplexities")
+print("Insert: O(log n)")
+print("Cancel by ID: O(log n)")
+print("Best Bid Lookup: O(1)")
+print("HashMap Lookup: O(1)")
