@@ -1,0 +1,124 @@
+class Order:
+    def __init__(self, order_id, price):
+        self.order_id = order_id
+        self.price = price
+
+
+class BSTNode:
+    def __init__(self, order):
+        self.order = order
+        self.left = None
+        self.right = None
+
+
+class OrderBook:
+    def __init__(self):
+        self.root = None
+        self.orders = {}  # HashMap
+
+    def insert(self, order):
+        self.orders[order.order_id] = order
+        self.root = self._insert(self.root, order)
+
+    def _insert(self, node, order):
+        if node is None:
+            return BSTNode(order)
+
+        if order.price < node.order.price:
+            node.left = self._insert(node.left, order)
+        else:
+            node.right = self._insert(node.right, order)
+
+        return node
+
+    def best_bid(self):
+        if self.root is None:
+            return None
+
+        current = self.root
+        while current.right:
+            current = current.right
+
+        return current.order
+
+    def cancel_order(self, order_id):
+        if order_id not in self.orders:
+            print("Order not found")
+            return
+
+        order = self.orders[order_id]
+        self.root = self._delete(self.root, order.price)
+        del self.orders[order_id]
+
+        print(f"Order {order_id} cancelled")
+
+    def _delete(self, node, price):
+        if node is None:
+            return node
+
+        if price < node.order.price:
+            node.left = self._delete(node.left, price)
+
+        elif price > node.order.price:
+            node.right = self._delete(node.right, price)
+
+        else:
+            if node.left is None:
+                return node.right
+
+            if node.right is None:
+                return node.left
+
+            temp = self._min_value(node.right)
+            node.order = temp.order
+            node.right = self._delete(node.right, temp.order.price)
+
+        return node
+
+    def _min_value(self, node):
+        current = node
+        while current.left:
+            current = current.left
+        return current
+
+    def display(self):
+        print("\nActive Orders:")
+        self._inorder(self.root)
+
+    def _inorder(self, node):
+        if node:
+            self._inorder(node.left)
+            print(
+                f"Order ID: {node.order.order_id}, Price: ₹{node.order.price}"
+            )
+            self._inorder(node.right)
+
+
+book = OrderBook()
+
+orders = [
+    (101, 2995),
+    (102, 3000),
+    (103, 2992),
+    (104, 3010),
+    (105, 3005),
+    (106, 2985)
+]
+
+for oid, price in orders:
+    book.insert(Order(oid, price))
+
+book.display()
+
+best = book.best_bid()
+print("\nBest Bid:")
+print(f"Order ID: {best.order_id}, Price: ₹{best.price}")
+
+print("\nCancelling Order 105")
+book.cancel_order(105)
+
+book.display()
+
+best = book.best_bid()
+print("\nUpdated Best Bid:")
+print(f"Order ID: {best.order_id}, Price: ₹{best.price}")
